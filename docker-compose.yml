@@ -15,6 +15,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.backend_cloudflare_registrar.rule=Host(`${BACKEND_DOMAIN}`)"
       - "traefik.http.routers.backend_cloudflare_registrar.entrypoints=websecure"
+      - "traefik.http.routers.backend_cloudflare_registrar.tls=true"
       - "traefik.http.routers.backend_cloudflare_registrar.tls.certresolver=myresolver"
       - "traefik.http.services.backend_cloudflare_registrar.loadbalancer.server.port=${BACKEND_PORT}"
     volumes:
