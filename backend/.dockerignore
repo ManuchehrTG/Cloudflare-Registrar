@@ -1,0 +1,17 @@
+.git
+.gitignore
+.DS_Store
+
+*.log
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+
+.venv/
+node_modules/
+logs/
+storage/
+staticfiles/
+static/

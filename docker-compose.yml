@@ -1,0 +1,31 @@
+services:
+  backend:
+    restart: unless-stopped
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+      - backend/.env
+    environment:
+      APP_DOMAIN: ${BACKEND_DOMAIN}
+      APP_HOST: ${BACKEND_HOST}
+      APP_PORT: ${BACKEND_PORT}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend_cloudflare_registrar.rule=Host(`${BACKEND_DOMAIN}`)"
+      - "traefik.http.routers.backend_cloudflare_registrar.entrypoints=websecure"
+      - "traefik.http.routers.backend_cloudflare_registrar.tls.certresolver=myresolver"
+      - "traefik.http.services.backend_cloudflare_registrar.loadbalancer.server.port=${BACKEND_PORT}"
+    volumes:
+      - ./backend/storage:/app/storage
+      - ./backend/logs:/app/logs
+    networks:
+      - app-network
+      - web
+
+networks:
+  app-network:
+    driver: bridge
+  web:
+    external: ${WEB_NETWORK_EXTERNAL:-false}
