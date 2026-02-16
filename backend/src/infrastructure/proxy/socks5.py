@@ -10,7 +10,14 @@ logger = logging.getLogger()
 class ProxySocks5(ProxyClient):
 	def connection(self, proxy: str) -> None:
 		try:
+			print(f"Received proxy string: {proxy}")
+
 			host, port, username, password = proxy.split(':')
+
+			print(f"Host: {host}")
+			print(f"Port: {port}")
+			print(f"Username: {username}")
+			print(f"Password length: {len(password)}")
 
 			socks.set_default_proxy(
 				socks.SOCKS5,

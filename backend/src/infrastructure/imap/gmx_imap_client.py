@@ -14,7 +14,7 @@ class GMXIMAPClient(IMAPClient):
 		mail = None
 		try:
 			# Здесь конкретная реализация с imaplib
-			mail = aioimaplib.IMAP4_SSL(host="imap.gmx.com", timeout=30)
+			mail = aioimaplib.IMAP4_SSL(host="imap.gmx.com", timeout=10)
 			await mail.wait_hello_from_server()
 
 			try:
