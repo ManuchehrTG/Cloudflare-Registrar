@@ -4,3 +4,8 @@ class CloudflareGetVerifyLinkCommand(BaseModel):
 	email: str
 	password: str
 	proxy: str | None
+
+class CloudflareWriteAccountDataCommand(BaseModel):
+	email: str
+	password: str
+	api_key: str

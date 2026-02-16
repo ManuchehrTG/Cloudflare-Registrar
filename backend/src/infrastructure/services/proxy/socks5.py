@@ -3,7 +3,7 @@ import socks
 import socket
 import urllib.request
 
-from src.domain.interfaces.proxy_client import ProxyClient
+from src.domain.interfaces.proxy import ProxyClient
 
 logger = logging.getLogger()
 

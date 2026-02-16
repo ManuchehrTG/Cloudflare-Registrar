@@ -1,3 +1,4 @@
+aiofiles==25.1.0
 aioimaplib==2.0.1
 alembic==1.18.0
 asyncpg==0.31.0

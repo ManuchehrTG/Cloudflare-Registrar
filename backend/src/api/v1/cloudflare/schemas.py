@@ -10,5 +10,11 @@ class CloudflareVerifyLinkResponse(BaseModel):
 	link: str = Field(..., description="Верификационная ссылка от cloudflare")
 	ip: str | None = Field(None, description="IP с которого выполнена задача")
 
-	class Config:
-		from_attributes = True
+
+class CloudflareAccountDataRequest(BaseModel):
+	email: str = Field(..., description="Email")
+	password: str = Field(..., description="Password")
+	api_key: str = Field(..., description="API KEY")
+
+class CloudflareAccountDataResponse(BaseModel):
+	status: str = Field(..., description="Статус")

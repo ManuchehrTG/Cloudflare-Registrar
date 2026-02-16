@@ -11,6 +11,7 @@ class AppSettings(BaseSettings):
 	languages: List[str] = Field(default_factory=list)
 	default_language: str
 	storage_dir: str
+	storage_cf_accounts: str
 
 	domain: str
 	host: str

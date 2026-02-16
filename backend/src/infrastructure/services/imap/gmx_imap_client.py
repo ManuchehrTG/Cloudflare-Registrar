@@ -3,9 +3,9 @@ import email
 import re
 from email.message import Message
 
-from src.application.imap.interfaces import IMAPClient
-from src.infrastructure.imap.exceptions import EmailNotFoundError, IMAPAuthenticationError, MessageNotFoundError, VerificationLinkNotFoundError
+from .exceptions import EmailNotFoundError, IMAPAuthenticationError, MessageNotFoundError, VerificationLinkNotFoundError
 from src.shared.exceptions.infrastructure import ExternalServiceError
+from src.domain.interfaces.imap import IMAPClient
 
 class GMXIMAPClient(IMAPClient):
 	"""Адаптер - конкретная реализация для GMX"""

@@ -17,6 +17,7 @@ docker-compose.override.yml
 
 # Sublime
 *.sublime-project
+*.sublime-workspace
 
 # Other
 .venv/
@@ -25,3 +26,5 @@ logs/
 storage/
 staticfiles/
 node_modules/
+
+!backend/src/**/storage/

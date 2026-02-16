@@ -1,8 +1,8 @@
 from src.application.decorators import handle_domain_errors
-from src.application.imap.commands import CloudflareGetVerifyLinkCommand
-from src.application.imap.dtos import CloudflareVerifyLinkDTO
-from src.application.imap.interfaces import IMAPClient
-from src.domain.interfaces.proxy_client import ProxyClient
+from src.application.cloudflare.commands import CloudflareGetVerifyLinkCommand
+from src.application.cloudflare.dtos import CloudflareVerifyLinkDTO
+from src.domain.interfaces.imap import IMAPClient
+from src.domain.interfaces.proxy import ProxyClient
 
 class CloudflareGetVerifyLink:
 	def __init__(self, proxy_client: ProxyClient, imap_client: IMAPClient):
