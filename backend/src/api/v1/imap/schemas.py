@@ -8,6 +8,7 @@ class CloudflareGetVerifyLinkRequest(BaseModel):
 class CloudflareVerifyLinkResponse(BaseModel):
 	email: str = Field(..., description="Верификационный email")
 	link: str = Field(..., description="Верификационная ссылка от cloudflare")
+	ip: str | None = Field(None, description="IP с которого выполнена задача")
 
 	class Config:
 		from_attributes = True
