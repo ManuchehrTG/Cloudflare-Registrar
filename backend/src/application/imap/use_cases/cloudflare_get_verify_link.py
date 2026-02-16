@@ -9,5 +9,5 @@ class CloudflareGetVerifyLink:
 
 	@handle_domain_errors
 	async def execute(self, command: CloudflareGetVerifyLinkCommand):
-		link = await self._imap_client.cloudflare_get_verify_link(email_address=command.email, password=command.password)
+		link = await self._imap_client.cloudflare_get_verify_link(email_address=command.email, password=command.password, proxy=command.proxy)
 		return CloudflareVerifyLinkDTO(email=command.email, link=link)

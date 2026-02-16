@@ -1,6 +1,8 @@
 import email
 import aioimaplib
 import re
+import socks
+import socket
 from email.message import Message
 
 from src.application.imap.interfaces import IMAPClient
@@ -10,7 +12,21 @@ from src.shared.exceptions.infrastructure import ExternalServiceError
 class GMXIMAPClient(IMAPClient):
 	"""Адаптер - конкретная реализация для GMX"""
 
-	async def cloudflare_get_verify_link(self, email_address: str, password: str) -> str:
+	def _use_proxy(self):
+		socks.set_default_proxy(
+			socks.SOCKS5,
+			"resident.proxyshard.com",
+			1080,
+			username="3XW54O12F6-country-any-sid-uha0uln0w4cy-filter-medium",
+			password="68KD3044E3"
+		)
+
+		socket.socket = socks.socksocket
+
+	async def cloudflare_get_verify_link(self, email_address: str, password: str, proxy: str | None = None) -> str:
+		if proxy:
+			self._use_proxy()
+
 		mail = None
 		try:
 			# Здесь конкретная реализация с imaplib
@@ -35,7 +51,6 @@ class GMXIMAPClient(IMAPClient):
 			result, msg_data = await mail.fetch(latest_id, "(RFC822)")
 
 			if result == 'OK' and msg_data:
-
 				for response in msg_data:
 					if isinstance(response, bytearray):
 						# msg_bytes = line[1] if len(line) > 1 else line[0]

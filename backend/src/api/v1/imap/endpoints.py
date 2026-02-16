@@ -12,6 +12,6 @@ async def get_cloudflare_verify_link(
 	request: schemas.CloudflareGetVerifyLinkRequest,
 	cloudflare_get_verify_link: CloudflareGetVerifyLink = Depends(get_cloudflare_get_verify_link)
 ):
-	command = CloudflareGetVerifyLinkCommand(email=request.email, password=request.password)
+	command = CloudflareGetVerifyLinkCommand(email=request.email, password=request.password, proxy=request.proxy)
 	cf_verify_link_dto = await cloudflare_get_verify_link.execute(command)
 	return schemas.CloudflareVerifyLinkResponse.from_orm(cf_verify_link_dto)
