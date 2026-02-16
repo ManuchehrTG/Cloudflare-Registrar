@@ -1,4 +1,5 @@
 import email
+import logging
 import aioimaplib
 import re
 import socks
@@ -9,23 +10,34 @@ from src.application.imap.interfaces import IMAPClient
 from src.infrastructure.imap.exceptions import EmailNotFoundError, IMAPAuthenticationError, MessageNotFoundError, VerificationLinkNotFoundError
 from src.shared.exceptions.infrastructure import ExternalServiceError
 
+logger = logging.getLogger()
+
 class GMXIMAPClient(IMAPClient):
 	"""Адаптер - конкретная реализация для GMX"""
 
-	def _use_proxy(self):
-		socks.set_default_proxy(
-			socks.SOCKS5,
-			"resident.proxyshard.com",
-			1080,
-			username="3XW54O12F6-country-any-sid-uha0uln0w4cy-filter-medium",
-			password="68KD3044E3"
-		)
+	def _use_proxy(self, proxy: str):
+		try:
+			parts = proxy.split(':')
+			host = parts[0]
+			port = int(parts[1])
+			username = parts[2]
+			password = parts[3]
 
-		socket.socket = socks.socksocket
+			socks.set_default_proxy(
+				socks.SOCKS5,
+				host,
+				port,
+				username=username,
+				password=password
+			)
+
+			socket.socket = socks.socksocket
+		except Exception as e:
+			logger.warning("Failed use proxy:", str(e))
 
 	async def cloudflare_get_verify_link(self, email_address: str, password: str, proxy: str | None = None) -> str:
 		if proxy:
-			self._use_proxy()
+			self._use_proxy(proxy=proxy)
 
 		mail = None
 		try:
