@@ -1,6 +1,7 @@
 import logging
 import socks
 import socket
+import urllib.request
 
 from src.domain.interfaces.proxy_client import ProxyClient
 
@@ -9,30 +10,22 @@ logger = logging.getLogger()
 class ProxySocks5(ProxyClient):
 	def connection(self, proxy: str) -> None:
 		try:
-			parts = proxy.split(':')
-			host = parts[0]
-			port = int(parts[1])
-			username = parts[2]
-			password = parts[3]
+			host, port, username, password = proxy.split(':')
 
 			socks.set_default_proxy(
 				socks.SOCKS5,
 				host,
-				port,
+				int(port),
 				username=username,
 				password=password
 			)
 
 			socket.socket = socks.socksocket
 		except Exception as e:
-			logger.warning("Failed use proxy:", str(e))
+			logger.exception("Failed use proxy")
 
 	def get_ip(self) -> str | None:
 		try:
-			s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-			s.connect(("8.8.8.8", 80))  # Google DNS
-			local_ip = s.getsockname()[0]
-			s.close()
-			return local_ip
+			return urllib.request.urlopen("https://api.ipify.org").read().decode()
 		except Exception as e:
-			logger.warning("Failed get ip:", str(e))
+			logger.exception("Failed get ip")
