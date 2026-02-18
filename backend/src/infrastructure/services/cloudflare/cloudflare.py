@@ -12,31 +12,37 @@ class CloudflareService(CloudflareProvider):
 	"""Адаптер - конкретная реализация для GMX"""
 	def __init__(self) -> None:
 		self.base_url = "https://api.cloudflare.com/client/v4"
-		self._http_client = httpx.AsyncClient(proxy="http://plan-limited-country-any:96nsvm0kgcg0qhx0@relay-eu.proxyshard.com:8080")
+		self._http_client = httpx.AsyncClient(
+			proxy="http://plan-limited-country-any:96nsvm0kgcg0qhx0@relay-eu.proxyshard.com:8080",
+			timeout=30,
+			verify=True,
+			follow_redirects=True
+		)
 
 	async def generate_ns(self, api_key: str, domain: str, ip: str) -> List[str]:
+		print("infra [generate_ns]")
 		try:
 			test_response = await self._http_client.get(
 				"http://api.ipify.org",  # Простой HTTP сайт (не HTTPS для теста)
 				timeout=10.0
 			)
 			proxy_ip = test_response.text
-			logger.info(f"Прокси IP (через ipify): {proxy_ip}")
+			print(f"Прокси IP (через ipify): {proxy_ip}")
 
 			cf_test = await self._http_client.get(
 				"https://api.cloudflare.com/client/v4/accounts",
 				headers={"Authorization": f"Bearer {api_key}"}
 			)
-			logger.info(f"Статус от Cloudflare: {cf_test.status_code}")
+			print(f"Статус от Cloudflare: {cf_test.status_code}")
 		except Exception as e:
-			logger.error(f"Прокси не работает: {e}")
+			print(f"Прокси не работает: {e}")
 
 		try:
 
 			account_id = await self._get_account_id(api_key)
 			zone = await self._get_or_create_zone(api_key, account_id, domain)
 
-			await self._disable_robots_txt_management(api_key, zone["id"])
+			# await self._disable_robots_txt_management(api_key, zone["id"])
 
 			await self._clear_dns(api_key, zone["id"])
 			await self._create_dns_record(api_key, zone["id"], "A", domain, ip)
@@ -47,6 +53,7 @@ class CloudflareService(CloudflareProvider):
 		except (CloudflareServiceError, CloudflareAccountsNotFoundError, NSIsNotListError):
 			raise
 		except Exception as e:
+			print("error API:", e)
 			raise CloudflareServiceError(message="Error [generate_ns]", original_errors=str(e))
 
 		if not isinstance(ns, list):
@@ -55,27 +62,31 @@ class CloudflareService(CloudflareProvider):
 		return ns
 
 	async def _get_account_id(self, api_key: str) -> str:
-		# print(">>> _get_account_id")
-		# print("base_url:", self.base_url)
-		# print("api_key:", api_key)
+		print(">>> _get_account_id")
+		print("base_url:", self.base_url)
+		print("api_key:", api_key)
 		response = await self._http_client.get(f"{self.base_url}/accounts", headers={"Authorization": f"Bearer {api_key}"})
 		response.raise_for_status()
 
 		data = response.json()
 
 		if not data.get("success"):
+			print("error _get_account_id:", data)
 			raise CloudflareServiceError(message=f"API Error [_get_account_id]: {data.get('errors', 'Unknown error')}")
 
 		accounts = data.get("result", [])
 		if not accounts:
+			print("error _get_account_id, not result.")
 			raise CloudflareAccountsNotFoundError()
 
 		return accounts[0]["id"]
 
 	async def _get_or_create_zone(self, api_key: str, account_id: str, domain: str):
 		zone = await self._get_zone_by_domain(api_key, domain)
+		print("zone [get]:", zone)
 		if not zone:
 			zone = await self._create_zone(api_key, account_id, domain)
+			print("zone [create]:", zone)
 
 		return zone
 
@@ -104,6 +115,7 @@ class CloudflareService(CloudflareProvider):
 
 		data = response.json()
 		if not data["success"]:
+			print("error create zone:", data)
 			raise CloudflareServiceError(message="Create zone error", details=data)
 
 		return data["result"]
@@ -181,7 +193,7 @@ class CloudflareService(CloudflareProvider):
 					deleted_count += 1
 
 				except httpx.HTTPStatusError as e:
-					logger.warning(f"Cloudflare не даст удалить системные записи (NS, SOA): {e}")
+					print(f"Cloudflare не даст удалить системные записи (NS, SOA): {e}")
 					pass
 
 			if len(records) < per_page:
