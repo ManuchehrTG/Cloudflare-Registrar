@@ -27,7 +27,7 @@ async def cloudflare_write_account_data(
 	await cloudflare_write_account_data.execute(command)
 	return schemas.CloudflareAccountDataResponse(status="ok")
 
-@router.post("/generate_ns", response_model=schemas.CloudflateAccountNSResponse)
+@router.post("/generate_ns") # response_model=schemas.CloudflateAccountNSResponse
 async def cloudflare_generate_ns(
 	request: schemas.CloudflareGenerateNSRequest,
 	cloudflare_generate_ns: CloudflareGenerateNS = Depends(get_cloudflare_generate_ns)

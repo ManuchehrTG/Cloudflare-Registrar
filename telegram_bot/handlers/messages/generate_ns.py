@@ -72,10 +72,13 @@ async def handle_state_message(message: Message, state: FSMContext, bot: Bot, us
 		except Exception as e:
 			logger.error("Cloudflare ns not found")
 
+	print("data [cloudflare_data]:", data)
+
 	text = ""
 	for i in data:
-		ns_text = ";".join(i["ns"])
-		text += f"<code>{i['email']};{i['password']};{ns_text}</code>\n"
+		if isinstance(i, dict):
+			ns_text = ";".join(i["ns"])
+			text += f"<code>{i['email']};{i['password']};{ns_text}</code>\n"
 
 	if not text:
 		return await message.answer("Данные не обработаны!, необходимо добавить ретраи и увеличить таймауты запросов.")
