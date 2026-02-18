@@ -28,8 +28,5 @@ class CloudflareGenerateNS:
 			logger.exception("The string is not cloudflare account data. Line: %s", line)
 			return
 
-		try:
-			ns_list = await self.cloudflare_service.generate_ns(api_key, domain, ip)
-			return CloudflareNSDTO(email=email, password=password, ns=ns_list)
-		except Exception as e:
-			logger.error("Generate ns error: %s", str(e))
+		ns_list = await self.cloudflare_service.generate_ns(api_key, domain, ip)
+		return CloudflareNSDTO(email=email, password=password, ns=ns_list)

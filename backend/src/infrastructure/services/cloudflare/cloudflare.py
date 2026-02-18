@@ -3,7 +3,7 @@ import httpx
 from typing import List
 
 # from .exceptions import EmailNotFoundError, IMAPAuthenticationError, MessageNotFoundError, VerificationLinkNotFoundError
-from src.infrastructure.services.cloudflare.exceptions import CloudflareServiceError, ExternalServiceError, CloudflareAccountsNotFoundError, NSIsNotListError
+from src.infrastructure.services.cloudflare.exceptions import CloudflareServiceError, CloudflareAccountsNotFoundError, NSIsNotListError
 from src.domain.interfaces.cloudflare import CloudflareProvider
 
 logger = logging.getLogger()
@@ -26,8 +26,11 @@ class CloudflareService(CloudflareProvider):
 			await self._create_dns_record(api_key, zone["id"], "A", f"www.{domain}", ip)
 
 			ns = await self._get_ns(api_key, zone["id"])
+
+		except (CloudflareServiceError, CloudflareAccountsNotFoundError, NSIsNotListError):
+			raise
 		except Exception as e:
-			raise CloudflareServiceError(message="Error", original_errors=str(e))
+			raise CloudflareServiceError(message="Error [generate_ns]", original_errors=str(e))
 
 		if not isinstance(ns, list):
 			raise NSIsNotListError(ns=ns)
