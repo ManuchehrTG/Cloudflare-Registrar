@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel, Field
 
 class CloudflareGetVerifyLinkRequest(BaseModel):
@@ -18,3 +19,13 @@ class CloudflareAccountDataRequest(BaseModel):
 
 class CloudflareAccountDataResponse(BaseModel):
 	status: str = Field(..., description="Статус")
+
+
+class CloudflareGenerateNSRequest(BaseModel):
+	domain: str = Field(..., description="Domain")
+	ip: str = Field(..., description="IP")
+
+class CloudflateAccountNSResponse(BaseModel):
+	email: str = Field(..., description="Email")
+	password: str = Field(..., description="Password")
+	ns: List[str] = Field(..., description="NS-ы аккаунта cloudflare")

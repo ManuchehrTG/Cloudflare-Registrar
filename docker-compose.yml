@@ -1,4 +1,20 @@
 services:
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - app-network
+      - web
+
   backend:
     restart: unless-stopped
     build:
@@ -7,10 +23,6 @@ services:
     env_file:
       - .env
       - backend/.env
-    environment:
-      APP_DOMAIN: ${BACKEND_DOMAIN}
-      APP_HOST: ${BACKEND_HOST}
-      APP_PORT: ${BACKEND_PORT}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend_cloudflare_registrar.rule=Host(`${BACKEND_DOMAIN}`)"
@@ -18,12 +30,42 @@ services:
       - "traefik.http.routers.backend_cloudflare_registrar.tls=true"
       - "traefik.http.routers.backend_cloudflare_registrar.tls.certresolver=myresolver"
       - "traefik.http.services.backend_cloudflare_registrar.loadbalancer.server.port=${BACKEND_PORT}"
+      - "traefik.http.routers.backend_cloudflare_registrar.priority=100"
     volumes:
       - ./backend/storage:/app/storage
       - ./backend/logs:/app/logs
     networks:
       - app-network
       - web
+
+  telegram_bot:
+    restart: unless-stopped
+    build:
+      context: telegram_bot
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.telegram_bot_cloudflare_registrar.rule=Host(`${TELEGRAM_BOT_DOMAIN}`) && Path(`/webhook`)"
+      - "traefik.http.routers.telegram_bot_cloudflare_registrar.entrypoints=websecure"
+      - "traefik.http.routers.telegram_bot_cloudflare_registrar.tls=true"
+      - "traefik.http.routers.telegram_bot_cloudflare_registrar.tls.certresolver=myresolver"
+      - "traefik.http.services.telegram_bot_cloudflare_registrar.loadbalancer.server.port=${TELEGRAM_BOT_PORT}"
+      - "traefik.http.routers.telegram_bot_cloudflare_registrar.priority=100"
+    env_file:
+      - .env
+      - telegram_bot/.env
+    volumes:
+      - ./telegram_bot/logs:/app/logs
+      - ./celery_app:/app/celery_app:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+      - web
+
+volumes:
+  redis_data:
 
 networks:
   app-network:

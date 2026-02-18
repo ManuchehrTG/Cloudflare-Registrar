@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends
 
 from . import schemas
-from .dependencies import get_cloudflare_get_verify_link, get_cloudflare_write_account_data
-from src.application.cloudflare.use_cases.cloudflare_get_verify_link import CloudflareGetVerifyLink
-from src.application.cloudflare.use_cases.cloudflare_write_account_data import CloudflareWriteAccountData
-from src.application.cloudflare.commands import CloudflareGetVerifyLinkCommand, CloudflareWriteAccountDataCommand
+from .dependencies import get_cloudflare_get_verify_link, get_cloudflare_write_account_data, get_cloudflare_generate_ns
+from src.application.cloudflare.use_cases.get_verify_link import CloudflareGetVerifyLink
+from src.application.cloudflare.use_cases.write_account_data import CloudflareWriteAccountData
+from src.application.cloudflare.use_cases.generate_ns import CloudflareGenerateNS
+from src.application.cloudflare.commands import CloudflareGetVerifyLinkCommand, CloudflareWriteAccountDataCommand, CloudflareGenerateNSCommand
 
 router = APIRouter(prefix="/cloudflare", tags=["Cloudflare"])
 
@@ -25,3 +26,13 @@ async def cloudflare_write_account_data(
 	command = CloudflareWriteAccountDataCommand(email=request.email, password=request.password, api_key=request.api_key)
 	await cloudflare_write_account_data.execute(command)
 	return schemas.CloudflareAccountDataResponse(status="ok")
+
+@router.post("/generate_ns", response_model=schemas.CloudflateAccountNSResponse)
+async def cloudflare_generate_ns(
+	request: schemas.CloudflareGenerateNSRequest,
+	cloudflare_generate_ns: CloudflareGenerateNS = Depends(get_cloudflare_generate_ns)
+):
+	command = CloudflareGenerateNSCommand(domain=request.domain, ip=request.ip)
+	cloudflare_ns = await cloudflare_generate_ns.execute(command)
+	if cloudflare_ns:
+		return schemas.CloudflateAccountNSResponse(email=cloudflare_ns.email, password=cloudflare_ns.password, ns=cloudflare_ns.ns)

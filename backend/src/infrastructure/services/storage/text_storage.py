@@ -16,7 +16,13 @@ class TextStorageService(TextStorage):
 	# Внутренние методы
 	async def _read_lines(self) -> List[str]:
 		async with aiofiles.open(self.file_path, "r", encoding="utf-8") as f:
-			return await f.readlines()
+			lines = await f.readlines()
+
+			# Фильтруем пустые строки в конце
+			while lines and not lines[-1].strip():
+				lines.pop()
+
+			return lines
 
 	async def _atomic_write(self, lines: List[str]) -> None:
 		temp_path = self.file_path.with_suffix(".tmp")
@@ -32,7 +38,7 @@ class TextStorageService(TextStorage):
 			async with aiofiles.open(self.file_path, "a", encoding="utf-8") as f:
 				await f.write(record.rstrip("\n") + "\n")
 
-	# 2. Получить N и удалить
+	# 2. Получить первые N и удалить
 	async def pop_first_n(self, count: int) -> List[str]:
 		async with self._lock:
 			lines = await self._read_lines()

@@ -1,0 +1,6 @@
+message: |
+  Пожалуйста, скиньте данные в формате <code>domain:server_ip</code>
+
+  <b>Пример:</b>
+  <code>example.com:1.2.3.4</code>
+  <code>example.net:117.42.97.184</code>

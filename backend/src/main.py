@@ -38,7 +38,7 @@ async def main() -> None:
 		title=settings.app.title,
 		version="1.0.0",
 		lifespan=lifespan,
-		docs_url="/api/docs" if settings.app.debug else None,
+		docs_url="/api/docs" if settings.debug else None,
 		swagger_ui_parameters={
 			"persistAuthorization": True,
 			# "operationsSorter": "method",
@@ -59,7 +59,7 @@ async def main() -> None:
 
 	app.add_middleware(
 		CORSMiddleware,
-		allow_origins=settings.app.allowed_origins,
+		allow_origins=settings.allowed_origins,
 		allow_credentials=True,
 		allow_methods=["*"],
 		allow_headers=["*"],
@@ -68,7 +68,7 @@ async def main() -> None:
 
 	app.include_router(api_router)
 
-	config = uvicorn.Config(app=app, host=settings.app.host, port=settings.app.port, log_level="info")
+	config = uvicorn.Config(app=app, host=settings.host, port=settings.port, log_level="info")
 	server = uvicorn.Server(config)
 
 	await server.serve()
