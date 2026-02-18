@@ -20,7 +20,6 @@ class CloudflareService(CloudflareProvider):
 		)
 
 	async def generate_ns(self, api_key: str, domain: str, ip: str) -> List[str]:
-		print("infra [generate_ns]")
 		try:
 			test_response = await self._http_client.get(
 				"http://api.ipify.org",  # Простой HTTP сайт (не HTTPS для теста)
@@ -28,12 +27,6 @@ class CloudflareService(CloudflareProvider):
 			)
 			proxy_ip = test_response.text
 			print(f"Прокси IP (через ipify): {proxy_ip}")
-
-			cf_test = await self._http_client.get(
-				"https://api.cloudflare.com/client/v4/accounts",
-				headers={"Authorization": f"Bearer {api_key}"}
-			)
-			print(f"Статус от Cloudflare: {cf_test.status_code}")
 		except Exception as e:
 			print(f"Прокси не работает: {e}")
 
@@ -62,9 +55,9 @@ class CloudflareService(CloudflareProvider):
 		return ns
 
 	async def _get_account_id(self, api_key: str) -> str:
-		print(">>> _get_account_id")
-		print("base_url:", self.base_url)
-		print("api_key:", api_key)
+		# print(">>> _get_account_id")
+		# print("base_url:", self.base_url)
+		# print("api_key:", api_key)
 		response = await self._http_client.get(f"{self.base_url}/accounts", headers={"Authorization": f"Bearer {api_key}"})
 		response.raise_for_status()
 

@@ -1,5 +1,6 @@
 import re
 from pydantic import BaseModel, field_validator
+from typing import List
 
 class DomainIPPair(BaseModel):
 	domain: str
@@ -28,3 +29,12 @@ class DomainIPPair(BaseModel):
 			if int(part) > 255:
 				raise ValueError(f"IP должен быть в диапазоне 0-255: {v}")
 		return v
+
+class DomainIPPairError(BaseModel):
+	line_number: int
+	error: str
+	raw_line: str
+
+class DomainIPPairResults(BaseModel):
+	pairs: List[DomainIPPair]
+	errors: List[DomainIPPairError]

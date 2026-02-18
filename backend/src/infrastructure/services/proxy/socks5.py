@@ -32,6 +32,8 @@ class ProxySocks5(ProxyClient):
 	def get_ip(self) -> str | None:
 		try:
 			print("get ip...")
-			return urllib.request.urlopen("https://api.ipify.org", timeout=5).read().decode()
+			ip = urllib.request.urlopen("https://api.ipify.org", timeout=5).read().decode()
+			print("ip:", ip)
+			return ip
 		except Exception as e:
 			logger.warning("Failed get ip")
