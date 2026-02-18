@@ -12,11 +12,27 @@ class CloudflareService(CloudflareProvider):
 	"""Адаптер - конкретная реализация для GMX"""
 	def __init__(self) -> None:
 		self.base_url = "https://api.cloudflare.com/client/v4"
-		# self._http_client = httpx.AsyncClient(proxy="http://3XW54O12F6-country-any-sid-rd6j33l39ro8-filter-medium:DaWKf10g6k@resident-ru.proxyshard.com:8080")
-		self._http_client = httpx.AsyncClient(proxy="http://plan-limited-country-any:96nsvm0kgcg0qhx0@relay-eu.proxyshard.com:8080")
+		self._http_client = httpx.AsyncClient(proxy="http://plan-limited-country-any:96nsawdwqd2130@relay-eu.proxyshard.com:8080")
 
 	async def generate_ns(self, api_key: str, domain: str, ip: str) -> List[str]:
 		try:
+			test_response = await self._http_client.get(
+				"http://api.ipify.org",  # Простой HTTP сайт (не HTTPS для теста)
+				timeout=10.0
+			)
+			proxy_ip = test_response.text
+			logger.info(f"Прокси IP (через ipify): {proxy_ip}")
+
+			cf_test = await self._http_client.get(
+				"https://api.cloudflare.com/client/v4/accounts",
+				headers={"Authorization": f"Bearer {api_key}"}
+			)
+			logger.info(f"Статус от Cloudflare: {cf_test.status_code}")
+		except Exception as e:
+			logger.error(f"Прокси не работает: {e}")
+
+		try:
+
 			account_id = await self._get_account_id(api_key)
 			zone = await self._get_or_create_zone(api_key, account_id, domain)
 
