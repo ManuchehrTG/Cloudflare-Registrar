@@ -12,7 +12,7 @@ class CloudflareService(CloudflareProvider):
 	"""Адаптер - конкретная реализация для GMX"""
 	def __init__(self) -> None:
 		self.base_url = "https://api.cloudflare.com/client/v4"
-		self._http_client = httpx.AsyncClient(proxy="http://plan-limited-country-any:96nsawdwqd2130@relay-eu.proxyshard.com:8080")
+		self._http_client = httpx.AsyncClient(proxy="http://plan-limited-country-any:96nsvm0kgcg0qhx0@relay-eu.proxyshard.com:8080")
 
 	async def generate_ns(self, api_key: str, domain: str, ip: str) -> List[str]:
 		try:
