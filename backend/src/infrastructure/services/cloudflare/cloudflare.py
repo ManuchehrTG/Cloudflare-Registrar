@@ -31,11 +31,13 @@ class CloudflareService(CloudflareProvider):
 			print(f"Прокси не работает: {e}")
 
 		try:
-
 			account_id = await self._get_account_id(api_key)
 			zone = await self._get_or_create_zone(api_key, account_id, domain)
 
-			# await self._disable_robots_txt_management(api_key, zone["id"])
+			try:
+				await self._disable_robots_txt_management(api_key, zone["id"])
+			except Exception as e:
+				logger.error(f"Error _disable_robots_txt_management: {e}")
 
 			await self._clear_dns(api_key, zone["id"])
 			await self._create_dns_record(api_key, zone["id"], "A", domain, ip)
@@ -76,10 +78,8 @@ class CloudflareService(CloudflareProvider):
 
 	async def _get_or_create_zone(self, api_key: str, account_id: str, domain: str):
 		zone = await self._get_zone_by_domain(api_key, domain)
-		print("zone [get]:", zone)
 		if not zone:
 			zone = await self._create_zone(api_key, account_id, domain)
-			print("zone [create]:", zone)
 
 		return zone
 
@@ -126,12 +126,15 @@ class CloudflareService(CloudflareProvider):
 		# Обновляем только нужный параметр
 		update_payload = {
 			**current_config,  # сохраняем все текущие настройки
-			"is_robots_txt_managed": False
+			"is_robots_txt_managed": False,
+			"cf_robots_variant": "off"
 		}
 
 		# Удаляем поля, которые могут быть проблемными
 		if "stale_zone_configuration" in update_payload:
 			del update_payload["stale_zone_configuration"]
+		if "using_latest_model" in update_payload:
+			del update_payload["using_latest_model"]
 
 		response = await self._http_client.put(
 			f"{self.base_url}/zones/{zone_id}/bot_management",

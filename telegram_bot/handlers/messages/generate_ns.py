@@ -7,10 +7,12 @@ from aiogram.types import BufferedInputFile, Message
 from datetime import datetime
 
 from core.config import settings
+from infrastructure.namecheap import namecheap_client
 from schemas.user import User
-from states.user import StateGenerateNS
 from services.domain_ip_pair_parser import DomainIPPairParser
 from services.cloudflare import CloudflareService
+from services.namecheap import NamecheapService
+from states.user import StateGenerateNS
 from utils.i18n import i18n
 
 logger = logging.getLogger()
@@ -74,29 +76,33 @@ async def handle_state_message(message: Message, state: FSMContext, bot: Bot, us
 	# await message.answer(text)
 
 
-	service = CloudflareService(api_domain=settings.api_domain)
-	results = await service.process_batch(result.pairs)
+	cf_service = CloudflareService(api_domain=settings.api_domain)
+	results = await cf_service.process_batch(result.pairs)
 
 	if not results:
 		return await message.answer("Нет данных!")
 
-	filename = f"cloudflare_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+	nc_service = NamecheapService(namecheap_client=namecheap_client)
 
-	with open(filename, 'w', encoding='utf-8') as f:
+	filename = f"cloudflare_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+	with open(filename, "w", encoding="utf-8") as f:
 		for res in results:
 			if res.success and res.data:
 				email = res.data.get("email")
 				password = res.data.get("password")
 				ns_list = res.data.get("ns", [])
-				ns_str = ';'.join(ns_list)
+				ns_str = ";".join(ns_list)
 
-				line = f"{email}:{password}:{ns_str}\n"
+				result = await nc_service.update_domain_ns(res.domain, ns_list)
+
+				line = f"{email}:{password}:{ns_str} | NS({result})\n"
 				f.write(line)
 			else:
 				line = f"{res.domain}:{res.ip} - {res.error}\n"
 				f.write(line)
 
-	with open(filename, 'rb') as f:
+	print("Lol")
+	with open(filename, "rb") as f:
 		await message.answer_document(
 			document=BufferedInputFile(f.read(), filename=filename),
 			caption=f"✅ Обработано {len(results)} доменов"

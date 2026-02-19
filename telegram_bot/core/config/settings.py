@@ -4,7 +4,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 from typing import Literal
 
-from .schemas import AppSettings, CelerySettings, LoggerSettings, RedisSettings, TelegramBotSettings
+from .schemas import AppSettings, CelerySettings, LoggerSettings, RedisSettings, TelegramBotSettings, NamecheapSettings
 
 class Settings(BaseSettings):
 	environment: Literal["local", "staging", "production"]
@@ -22,11 +22,11 @@ class Settings(BaseSettings):
 	redis: RedisSettings = RedisSettings()
 	telegram_bot: TelegramBotSettings = TelegramBotSettings()
 
+	namecheap: NamecheapSettings = NamecheapSettings()
+
 	class Config:
 		extra = "ignore"
 		env_file = [".env"]
 		env_file_encoding = "utf-8"
 
 settings = Settings()
-
-print("settings:", settings)

@@ -92,11 +92,18 @@ class CloudflareService:
 
 			except httpx.HTTPStatusError as e:
 				logger.error(f"HTTP error for {pair.domain}: {e.response.status_code}")
+
+				if e.response.status_code == 503:
+					data = e.response.json()
+					error = f"API error: {data['message']}"
+				else:
+					error = f"API error: {e.response.status_code}"
+
 				results.append(CloudflareNSResult(
 					success=False,
 					domain=pair.domain,
 					ip=pair.server_ip,
-					error=f"API error: {e.response.status_code}",
+					error=error,
 					status_code=e.response.status_code
 				))
 
