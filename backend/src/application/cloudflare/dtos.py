@@ -7,6 +7,7 @@ class CloudflareVerifyLinkDTO(BaseModel):
 	ip: str | None
 
 class CloudflareNSDTO(BaseModel):
+	api_key: str
 	email: str
 	password: str
 	ns: List[str]

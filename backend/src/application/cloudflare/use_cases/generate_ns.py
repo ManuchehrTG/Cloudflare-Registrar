@@ -29,4 +29,4 @@ class CloudflareGenerateNS:
 			return
 
 		ns_list = await self.cloudflare_service.generate_ns(api_key, domain, ip)
-		return CloudflareNSDTO(email=email, password=password, ns=ns_list)
+		return CloudflareNSDTO(api_key=api_key, email=email, password=password, ns=ns_list)

@@ -26,6 +26,7 @@ class CloudflareGenerateNSRequest(BaseModel):
 	ip: str = Field(..., description="IP")
 
 class CloudflateAccountNSResponse(BaseModel):
+	api_key: str = Field(..., description="API Key от cloudflare")
 	email: str = Field(..., description="Email")
 	password: str = Field(..., description="Password")
 	ns: List[str] = Field(..., description="NS-ы аккаунта cloudflare")

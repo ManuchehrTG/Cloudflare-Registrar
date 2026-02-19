@@ -121,11 +121,14 @@ class CloudflareService(CloudflareProvider):
 			f"{self.base_url}/zones/{zone_id}/bot_management",
 			headers={"Authorization": f"Bearer {api_key}"}
 		)
-		current_config = get_response.json()["result"]
+		current_config = get_response.json()
+
+		if not current_config.get("result"):
+			raise CloudflareServiceError(message=f"API Error [_disable_robots_txt_management]: {current_config}")
 
 		# Обновляем только нужный параметр
 		update_payload = {
-			**current_config,  # сохраняем все текущие настройки
+			**current_config["result"],  # сохраняем все текущие настройки
 			"is_robots_txt_managed": False,
 			"cf_robots_variant": "off"
 		}
@@ -143,10 +146,8 @@ class CloudflareService(CloudflareProvider):
 		)
 
 		data = response.json()
-		if not data["success"]:
-			raise CloudflareServiceError(message=f"API Error [_disable_robots_txt_management]: {data.get('errors')}")
-
-		return data["result"]
+		if not data.get("result"):
+			raise CloudflareServiceError(message=f"API Error [_disable_robots_txt_management]: {data}")
 
 	async def _clear_dns(self, api_key: str, zone_id: str) -> int:
 		"""

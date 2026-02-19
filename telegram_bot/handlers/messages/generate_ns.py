@@ -88,6 +88,7 @@ async def handle_state_message(message: Message, state: FSMContext, bot: Bot, us
 	with open(filename, "w", encoding="utf-8") as f:
 		for res in results:
 			if res.success and res.data:
+				api_key = res.data.get("api_key")
 				email = res.data.get("email")
 				password = res.data.get("password")
 				ns_list = res.data.get("ns", [])
@@ -95,13 +96,12 @@ async def handle_state_message(message: Message, state: FSMContext, bot: Bot, us
 
 				result = await nc_service.update_domain_ns(res.domain, ns_list)
 
-				line = f"{email}:{password}:{ns_str} | NS({result})\n"
+				line = f"{api_key}:{email}:{password}:{res.domain}:{res.ip}:{ns_str} | NS({result})\n"
 				f.write(line)
 			else:
 				line = f"{res.domain}:{res.ip} - {res.error}\n"
 				f.write(line)
 
-	print("Lol")
 	with open(filename, "rb") as f:
 		await message.answer_document(
 			document=BufferedInputFile(f.read(), filename=filename),

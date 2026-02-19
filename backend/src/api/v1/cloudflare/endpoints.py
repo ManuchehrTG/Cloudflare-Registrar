@@ -35,4 +35,4 @@ async def cloudflare_generate_ns(
 	command = CloudflareGenerateNSCommand(domain=request.domain, ip=request.ip)
 	cloudflare_ns = await cloudflare_generate_ns.execute(command)
 	if cloudflare_ns:
-		return schemas.CloudflateAccountNSResponse(email=cloudflare_ns.email, password=cloudflare_ns.password, ns=cloudflare_ns.ns)
+		return schemas.CloudflateAccountNSResponse.model_validate(cloudflare_ns.model_dump())
